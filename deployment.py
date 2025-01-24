@@ -9,62 +9,136 @@ model = joblib.load('model.pkl')
 # App title
 st.title("Diamond Price Predictor")
 
-# Input form for user to enter features
-st.sidebar.header("Diamond Features")
-shape = st.sidebar.selectbox("Shape", ['Cushion Modified', 'Oval', 'Pear', 'Other'])
-cut = st.sidebar.selectbox("Cut", ['Ideal', 'Very Good', 'Good', 'Fair'])
-color = st.sidebar.selectbox("Color", ['D', 'E', 'F', 'G', 'H'])
-clarity = st.sidebar.selectbox("Clarity", ['IF', 'VVS1', 'VVS2', 'VS1', 'VS2', 'SI1', 'SI2'])
-carat_weight = st.sidebar.slider("Carat Weight", 0.2, 5.0, step=0.01)
-length_width_ratio = st.sidebar.slider("Length/Width Ratio", 0.5, 3.0, step=0.01)
-depth_pct = st.sidebar.slider("Depth %", 50.0, 80.0, step=0.1)
-table_pct = st.sidebar.slider("Table %", 50.0, 80.0, step=0.1)
-polish = st.sidebar.selectbox("Polish", ['Excellent', 'Very Good', 'Good'])
-symmetry = st.sidebar.selectbox("Symmetry", ['Excellent', 'Very Good', 'Good'])
-girdle = st.sidebar.selectbox("Girdle", ['Medium', 'Thick', 'Thin', 'Medium to Thick'])
-culet = st.sidebar.selectbox("Culet", ['None', 'Small', 'Medium', 'Large'])
-length = st.sidebar.slider("Length (mm)", 3.0, 15.0, step=0.1)
-width = st.sidebar.slider("Width (mm)", 3.0, 15.0, step=0.1)
-height = st.sidebar.slider("Height (mm)", 2.0, 15.0, step=0.1)
-diamond_type = st.sidebar.selectbox("Type", ['Lab-Grown', 'Natural'])
-fluorescence = st.sidebar.selectbox("Fluorescence", ['None', 'Faint', 'Medium', 'Strong'])
+# Hardcoded values for dropdown options
+shape_options = [
+    'Cushion Modified', 'Oval', 'Pear', 'Cushion', 'Emerald', 'Heart',
+    'Marquise', 'Princess', 'Radiant', 'Round', 'Square Radiant'
+]
+cut_options = ['Astor', 'Excellent', 'Ideal', 'Uncut', 'Very Good']
+color_options = ['D', 'E', 'F', 'G', 'H']
+clarity_options = ['FL', 'IF', 'VS1', 'VS2', 'VVS1', 'VVS2']
+polish_options = ['Excellent', 'Good', 'Very Good']
+symmetry_options = ['Excellent', 'Good', 'Very Good']
+girdle_options = [
+    'Medium', 'Thick', 'Thin', 'Extremely Thick', 'Extremely Thin to Extremely Thick',
+    'Extremely Thin to Medium', 'Extremely Thin to Slightly Thick', 'Medium to Thick',
+    'Slightly Thick', 'Slightly Thick to Thick', 'Very Thick'
+]
+culet_options = ['None', 'Small', 'Medium', 'Large', 'Very Large', 'Very Small']
+type_options = ['Lab-Grown', 'Natural']
+fluorescence_options = ['None', 'Faint', 'Medium', 'Strong']
+
+# Sidebar dropdowns with hardcoded options
+shape = st.sidebar.selectbox("Shape", shape_options)
+cut = st.sidebar.selectbox("Cut", cut_options)
+color = st.sidebar.selectbox("Color", color_options)
+clarity = st.sidebar.selectbox("Clarity", clarity_options)
+polish = st.sidebar.selectbox("Polish", polish_options)
+symmetry = st.sidebar.selectbox("Symmetry", symmetry_options)
+girdle = st.sidebar.selectbox("Girdle", girdle_options)
+culet = st.sidebar.selectbox("Culet", culet_options)
+diamond_type = st.sidebar.selectbox("Type", type_options)
+fluorescence = st.sidebar.selectbox("Fluorescence", fluorescence_options)
+
+# Numeric inputs (replacing sliders)
+carat_weight = st.sidebar.number_input("Carat Weight (ct)", min_value=0.2, max_value=5.0, step=0.01)
+length_width_ratio = st.sidebar.number_input("Length/Width Ratio", min_value=0.5, max_value=3.0, step=0.01)
+depth_pct = st.sidebar.number_input("Depth %", min_value=50.0, max_value=80.0, step=0.1)
+table_pct = st.sidebar.number_input("Table %", min_value=50.0, max_value=80.0, step=0.1)
+length = st.sidebar.number_input("Length (mm)", min_value=3.0, max_value=15.0, step=0.1)
+width = st.sidebar.number_input("Width (mm)", min_value=3.0, max_value=15.0, step=0.1)
+height = st.sidebar.number_input("Height (mm)", min_value=2.0, max_value=15.0, step=0.1)
+
+# Ensure all hardcoded dropdown values are used correctly in subsequent processing
 
 # Collect the inputs into a DataFrame
 input_data = {
-    'Shape': shape,
-    'Cut': cut,
-    'Color': color,
-    'Clarity': clarity,
     'Carat Weight': carat_weight,
     'Length/Width Ratio': length_width_ratio,
     'Depth %': depth_pct,
     'Table %': table_pct,
-    'Polish': polish,
-    'Symmetry': symmetry,
-    'Girdle': girdle,
-    'Culet': culet,
     'Length': length,
     'Width': width,
     'Height': height,
-    'Type': diamond_type,
-    'Fluorescence': fluorescence
+    'Shape_Cushion': 1 if shape == "Cushion" else 0,
+    'Shape_Cushion Modified': 1 if shape == "Cushion Modified" else 0,
+    'Shape_Emerald': 1 if shape == "Emerald" else 0,
+    'Shape_Heart': 1 if shape == "Heart" else 0,
+    'Shape_Marquise': 1 if shape == "Marquise" else 0,
+    'Shape_Oval': 1 if shape == "Oval" else 0,
+    'Shape_Pear': 1 if shape == "Pear" else 0,
+    'Shape_Princess': 1 if shape == "Princess" else 0,
+    'Shape_Radiant': 1 if shape == "Radiant" else 0,
+    'Shape_Round': 1 if shape == "Round" else 0,
+    'Shape_Square Radiant': 1 if shape == "Square Radiant" else 0,
+    'Cut_Astor': 1 if cut == "Astor" else 0,
+    'Cut_Excellent': 1 if cut == "Excellent" else 0,
+    'Cut_Ideal': 1 if cut == "Ideal" else 0,
+    'Cut_Uncut': 1 if cut == "Uncut" else 0,
+    'Cut_Very Good': 1 if cut == "Very Good" else 0,
+    'Color_D': 1 if color == "D" else 0,
+    'Color_E': 1 if color == "E" else 0,
+    'Color_F': 1 if color == "F" else 0,
+    'Color_G': 1 if color == "G" else 0,
+    'Color_H': 1 if color == "H" else 0,
+    'Clarity_FL': 1 if clarity == "FL" else 0,
+    'Clarity_IF': 1 if clarity == "IF" else 0,
+    'Clarity_VS1': 1 if clarity == "VS1" else 0,
+    'Clarity_VS2': 1 if clarity == "VS2" else 0,
+    'Clarity_VVS1': 1 if clarity == "VVS1" else 0,
+    'Clarity_VVS2': 1 if clarity == "VVS2" else 0,
+    'Polish_Excellent': 1 if polish == "Excellent" else 0,
+    'Polish_Good': 1 if polish == "Good" else 0,
+    'Polish_Very Good': 1 if polish == "Very Good" else 0,
+    'Symmetry_Excellent': 1 if symmetry == "Excellent" else 0,
+    'Symmetry_Good': 1 if symmetry == "Good" else 0,
+    'Symmetry_Very Good': 1 if symmetry == "Very Good" else 0,
+    'Girdle_Extremely Thick': 1 if girdle == "Extremely Thick" else 0,
+    'Girdle_Extremely Thin to Extremely Thick': 1 if girdle == "Extremely Thin to Extremely Thick" else 0,
+    'Girdle_Extremely Thin to Medium': 1 if girdle == "Extremely Thin to Medium" else 0,
+    'Girdle_Extremely Thin to Slightly Thick': 1 if girdle == "Extremely Thin to Slightly Thick" else 0,
+    'Girdle_Medium': 1 if girdle == "Medium" else 0,
+    'Girdle_Medium to Extremely Thick': 1 if girdle == "Medium to Extremely Thick" else 0,
+    'Girdle_Medium to Slightly Thick': 1 if girdle == "Medium to Slightly Thick" else 0,
+    'Girdle_Medium to Thick': 1 if girdle == "Medium to Thick" else 0,
+    'Girdle_Medium to Very Thick': 1 if girdle == "Medium to Very Thick" else 0,
+    'Girdle_Slightly Thick': 1 if girdle == "Slightly Thick" else 0,
+    'Girdle_Slightly Thick to Extremely Thick': 1 if girdle == "Slightly Thick to Extremely Thick" else 0,
+    'Girdle_Slightly Thick to Slightly Thick': 1 if girdle == "Slightly Thick to Slightly Thick" else 0,
+    'Girdle_Slightly Thick to Thick': 1 if girdle == "Slightly Thick to Thick" else 0,
+    'Girdle_Slightly Thick to Very Thick': 1 if girdle == "Slightly Thick to Very Thick" else 0,
+    'Girdle_Thick': 1 if girdle == "Thick" else 0,
+    'Girdle_Thick to Extremely Thick': 1 if girdle == "Thick to Extremely Thick" else 0,
+    'Girdle_Thick to Very Thick': 1 if girdle == "Thick to Very Thick" else 0,
+    'Girdle_Thin': 1 if girdle == "Thin" else 0,
+    'Girdle_Thin to Extremely Thick': 1 if girdle == "Thin to Extremely Thick" else 0,
+    'Girdle_Thin to Medium': 1 if girdle == "Thin to Medium" else 0,
+    'Girdle_Thin to Slightly Thick': 1 if girdle == "Thin to Slightly Thick" else 0,
+    'Girdle_Thin to Thick': 1 if girdle == "Thin to Thick" else 0,
+    'Girdle_Thin to Very Thick': 1 if girdle == "Thin to Very Thick" else 0,
+    'Girdle_Very Thick': 1 if girdle == "Very Thick" else 0,
+    'Girdle_Very Thick to Extremely Thick': 1 if girdle == "Very Thick to Extremely Thick" else 0,
+    'Girdle_Very Thin to Extremely Thick': 1 if girdle == "Very Thin to Extremely Thick" else 0,
+    'Girdle_Very Thin to Slightly Thick': 1 if girdle == "Very Thin to Slightly Thick" else 0,
+    'Girdle_Very Thin to Thick': 1 if girdle == "Very Thin to Thick" else 0,
+    'Girdle_Very Thin to Very Thick': 1 if girdle == "Very Thin to Very Thick" else 0,
+    'Culet_Medium': 1 if culet == "Medium" else 0,
+    'Culet_Pointed': 1 if culet == "Pointed" else 0,
+    'Culet_Small': 1 if culet == "Small" else 0,
+    'Culet_Very Large': 1 if culet == "Very Large" else 0,
+    'Culet_Very Small': 1 if culet == "Very Small" else 0,
+    'Type_GIA': 1 if diamond_type == "GIA" else 0,
+    'Type_GIA Lab-Grown': 1 if diamond_type == "GIA Lab-Grown" else 0,
+    'Type_IGI Lab-Grown': 1 if diamond_type == "IGI Lab-Grown" else 0,
+    'Fluorescence_Faint': 1 if fluorescence == "Faint" else 0,
+    'Fluorescence_Medium': 1 if fluorescence == "Medium" else 0,
+    'Fluorescence_Strong': 1 if fluorescence == "Strong" else 0,
+    'Fluorescence_Unknown': 1 if fluorescence == "Unknown" else 0,
 }
 
 input_df = pd.DataFrame([input_data])
 
-# Perform one-hot encoding to match model requirements
-encoded_df = pd.get_dummies(input_df)
-
-# Ensure that the encoded columns align with the model's training data
-# Fill missing columns with 0
-model_columns = joblib.load('columns_after_encoding.pkl')  # Columns used in training
-for col in model_columns:
-    if col not in encoded_df:
-        encoded_df[col] = 0
-encoded_df = encoded_df[model_columns]
-
 # Prediction
 if st.button("Predict Price"):
-    prediction = model.predict(encoded_df)
+    prediction = model.predict(input_df)
     st.write(f"### Predicted Diamond Price: ${prediction[0]:,.2f}")
-
