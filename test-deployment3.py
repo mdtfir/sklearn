@@ -5,9 +5,30 @@ import joblib
 import matplotlib.pyplot as plt
 import seaborn as sns
 import plotly.express as px
+import base64
 
 # Load the trained model
 model = joblib.load('model.pkl')
+
+def get_base64_of_bin_file(bin_file):
+    with open(bin_file, 'rb') as f:
+        data = f.read()
+    return base64.b64encode(data).decode()
+
+def set_background(png_file):
+    bin_str = get_base64_of_bin_file(png_file)
+    page_bg_img = f'''
+    <style>
+    .stApp {{
+        background-image: url("data:image/png;base64,{bin_str}");
+        background-size: cover;
+    }}
+    </style>
+    '''
+    st.markdown(page_bg_img, unsafe_allow_html=True)
+
+set_background('jumpman.jpg')
+
 
 # App title
 st.title("Diamond Price Predictor")
